@@ -20,7 +20,7 @@ app = Starlette()
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_headers=['X-Requested-With', 'Content-Type'])
 app.mount('/static', StaticFiles(directory='app/static'))
 
-MODEL_PATH = path/'models'/f'{model_file_name}.h5'
+MODEL_PATH = path/'models'/'model.h5'
 IMG_FILE_SRC = path/'static'/'saved_image.png'
 PREDICTION_FILE_SRC = path/'static'/'predictions.txt'
 
@@ -33,7 +33,7 @@ async def download_file(url, dest):
 
 async def setup_model():
     #UNCOMMENT HERE FOR CUSTOM TRAINED MODEL
-    await download_file(model_file_url, MODEL_PATH)
+  #  await download_file(model_file_url, MODEL_PATH)
     model = tf.keras.models.Sequential()  
     model.add(tf.keras.layers.Conv2D(64, (3, 3), padding='same',
                    input_shape=(128,480,1)))
