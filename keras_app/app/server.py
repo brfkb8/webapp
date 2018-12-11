@@ -11,7 +11,7 @@ import uvicorn, aiohttp, asyncio
 import base64, sys, numpy as np, tensorflow as tf
 
 path = Path(__file__).parent
-model_file_url = 'https://www.dropbox.com/s/8l89npsjdrgs56p/lang.04-0.668.hdf5?raw=1'
+model_file_url = 'https://www.dropbox.com/s/8l89npsjdrgs56p/lang.04-0.668.hdf5?dl=1'
 model_file_name = 'model'
 classes = ['dutch', 'english', 'french', 'german', 'italian', 'japanese', 'javanese', 'korean', 
            'mandarin', 'russian', 'spanish', 'sundanese', 'vietnamese']
