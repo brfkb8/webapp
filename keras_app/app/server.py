@@ -11,7 +11,8 @@ import uvicorn, aiohttp, asyncio
 import base64, sys, numpy as np, tensorflow as tf
 
 path = Path(__file__).parent
-model_file_url = 'https://www.dropbox.com/s/8l89npsjdrgs56p/lang.04-0.668.hdf5?dl=1'
+#model_file_url = 'https://github.com/pankymathur/Fine-Grained-Clothing-Classification/blob/master/data/cloth_categories/models/stage-1_sz-150.pth?raw=true'
+model_file_url = 'https://github.com/brfkb8/webapp/blob/master/keras_app/app/models/model.h5?raw=true'
 model_file_name = 'model'
 classes = ['dutch', 'english', 'french', 'german', 'italian', 'japanese', 'javanese', 'korean', 
            'mandarin', 'russian', 'spanish', 'sundanese', 'vietnamese']
@@ -20,7 +21,7 @@ app = Starlette()
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_headers=['X-Requested-With', 'Content-Type'])
 app.mount('/static', StaticFiles(directory='app/static'))
 
-MODEL_PATH = path/'models'/'model.h5'
+MODEL_PATH = path/'models'/f'{model_file_name}.h5'
 IMG_FILE_SRC = path/'static'/'saved_image.png'
 PREDICTION_FILE_SRC = path/'static'/'predictions.txt'
 
