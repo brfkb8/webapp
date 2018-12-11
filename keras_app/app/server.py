@@ -8,11 +8,13 @@ from starlette.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from pathlib import Path
 import uvicorn, aiohttp, asyncio
-import base64, sys, numpy as np
+import base64, sys, numpy as np, tensorflow as tf
 
 path = Path(__file__).parent
-model_file_url = 'YOUR MODEL.h5 DIRECT / RAW DOWNLOAD URL HERE!'
+model_file_url = 'https://www.dropbox.com/s/8l89npsjdrgs56p/lang.04-0.668.hdf5?dl=1'
 model_file_name = 'model'
+classes = ['dutch', 'english', 'french', 'german', 'italian', 'japanese', 'javanese', 'korean', 
+           'mandarin', 'russian', 'spanish', 'sundanese', 'vietnamese']
 
 app = Starlette()
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_headers=['X-Requested-With', 'Content-Type'])
@@ -31,10 +33,47 @@ async def download_file(url, dest):
 
 async def setup_model():
     #UNCOMMENT HERE FOR CUSTOM TRAINED MODEL
-    # await download_file(model_file_url, MODEL_PATH)
-    # model = load_model(MODEL_PATH) # Load your Custom trained model
+    await download_file(model_file_url, MODEL_PATH)
+    model = tf.keras.models.Sequential()  
+    model.add(tf.keras.layers.Conv2D(64, (3, 3), padding='same',
+                   input_shape=(128,480,1)))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(1,3)))
+    model.add(tf.keras.layers.Dropout(0.25))
+    model.add(tf.keras.layers.Conv2D(64, (3, 3), padding='same'))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(1,3)))
+    model.add(tf.keras.layers.Dropout(0.25))
+    model.add(tf.keras.layers.Conv2D(64, (3, 3), padding='same'))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(1,3)))
+    model.add(tf.keras.layers.Dropout(0.25))
+    model.add(tf.keras.layers.Conv2D(64, (1, 3), padding='same'))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.Conv2D(64, (1, 3), padding='same'))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(1,3)))
+    model.add(tf.keras.layers.Dropout(0.25))
+    model.add(tf.keras.layers.Conv2D(64, (1, 3), padding='same'))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.Conv2D(64, (1, 3), padding='same'))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.MaxPooling2D(pool_size=(1,3)))
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(1024))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.Dropout(0.20))
+    model.add(tf.keras.layers.Dense(512))
+    model.add(tf.keras.layers.Activation('relu'))
+    model.add(tf.keras.layers.Dropout(0.20))
+    model.add(tf.keras.layers.Dense(13, activation='softmax'))
+
+    model.compile(optimizer=tf.train.RMSPropOptimizer(learning_rate=0.0005),
+                    loss=tf.keras.losses.categorical_crossentropy, metrics=['acc'])
+    model.load_weights(MODEL_PATH)
+   #  model = load_model(MODEL_PATH) # Load your Custom trained model
     # model._make_predict_function()
-    model = ResNet50(weights='imagenet') # COMMENT, IF you have Custom trained model
+   # model = ResNet50(weights='imagenet') # COMMENT, IF you have Custom trained model
     return model
 
 # Asynchronous Steps
@@ -51,11 +90,12 @@ async def upload(request):
     with open(IMG_FILE_SRC, 'wb') as f: f.write(bytes)
     return model_predict(IMG_FILE_SRC, model)
 
+
 def model_predict(img_path, model):
-    result = []; img = image.load_img(img_path, target_size=(224, 224))
-    x = preprocess_input(np.expand_dims(image.img_to_array(img), axis=0))
-    predictions = decode_predictions(model.predict(x), top=3)[0] # Get Top-3 Accuracy
-    for p in predictions: _,label,accuracy = p; result.append((label,accuracy))
+    result = []; img = image.load_img(img_path, target_size=(128, 480),color_mode='grayscale')
+    x = np.expand_dims(image.img_to_array(img), axis=0)
+    result = classes[np.argmax(model.predict(x,batch=1))]
+   # for p in predictions: _,label,accuracy = p; result.append((label,accuracy))
     with open(PREDICTION_FILE_SRC, 'w') as f: f.write(str(result))
     result_html = path/'static'/'result.html'
     return HTMLResponse(result_html.open().read())
