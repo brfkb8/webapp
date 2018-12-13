@@ -30,10 +30,8 @@ async def download_file(url, dest):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             data = await response.read()
-            try:
-                with open(dest, 'wb') as f: f.write(data)
-            except:
-                print('Beth, first try!!!!!')
+            with open(dest, 'wb') as f: f.write(data)
+
 
 async def setup_model():
     #UNCOMMENT HERE FOR CUSTOM TRAINED MODEL
@@ -74,7 +72,8 @@ async def setup_model():
 
     model.compile(optimizer=tf.train.RMSPropOptimizer(learning_rate=0.0005),
                     loss=tf.keras.losses.categorical_crossentropy, metrics=['acc'])
-    model.load_weights(MODEL_PATH)
+    print(MODEL_PATH)
+    model.load_weights(str(MODEL_PATH))
    #  model = load_model(MODEL_PATH) # Load your Custom trained model
     # model._make_predict_function()
    # model = ResNet50(weights='imagenet') # COMMENT, IF you have Custom trained model
