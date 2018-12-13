@@ -21,9 +21,9 @@ app = Starlette()
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_headers=['X-Requested-With', 'Content-Type'])
 app.mount('/static', StaticFiles(directory='app/static'))
 
-MODEL_PATH = path/'models'/f'{model_file_name}.h5'
-IMG_FILE_SRC = path/'static'/'saved_image.png'
-PREDICTION_FILE_SRC = path/'static'/'predictions.txt'
+MODEL_PATH = str(path/'models'/f'{model_file_name}.h5')
+IMG_FILE_SRC = str(path/'static'/'saved_image.png')
+PREDICTION_FILE_SRC = str(path/'static'/'predictions.txt')
 
 async def download_file(url, dest):
     if dest.exists(): return
@@ -95,17 +95,16 @@ async def upload(request):
 
 
 def model_predict(img_path, model):
-    result = []; img = image.load_img(img_path, target_size=(128, 480),color_mode='grayscale')
+    img = image.load_img(img_path, target_size=(128, 480),color_mode='grayscale')
     x = np.expand_dims(image.img_to_array(img), axis=0)
     result = classes[np.argmax(model.predict(x,batch=1))]
-   # for p in predictions: _,label,accuracy = p; result.append((label,accuracy))
     with open(PREDICTION_FILE_SRC, 'w') as f: f.write(str(result))
-    result_html = path/'static'/'result.html'
+        result_html = str(path/'static'/'result.html')
     return HTMLResponse(result_html.open().read())
 
 @app.route("/")
 def form(request):
-    index_html = path/'static'/'index.html'
+    index_html = str(path/'static'/'index.html')
     return HTMLResponse(index_html.open().read())
 
 if __name__ == "__main__":
