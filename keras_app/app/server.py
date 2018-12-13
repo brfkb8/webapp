@@ -99,7 +99,7 @@ def model_predict(img_path, model):
     x = np.expand_dims(image.img_to_array(img), axis=0)
     result = classes[np.argmax(model.predict(x,batch=1))]
     with open(PREDICTION_FILE_SRC, 'w') as f: f.write(str(result))
-        result_html = str(path/'static'/'result.html')
+    result_html = str(path/'static'/'result.html')
     return HTMLResponse(result_html.open().read())
 
 @app.route("/")
