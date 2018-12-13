@@ -30,11 +30,14 @@ async def download_file(url, dest):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             data = await response.read()
-            with open(dest, 'wb') as f: f.write(data)
+            try:
+                with open(dest, 'wb') as f: f.write(data)
+            except:
+                print('Beth, first try!!!!!')
 
 async def setup_model():
     #UNCOMMENT HERE FOR CUSTOM TRAINED MODEL
-  #  await download_file(model_file_url, MODEL_PATH)
+    await download_file(model_file_url, MODEL_PATH)
     model = tf.keras.models.Sequential()  
     model.add(tf.keras.layers.Conv2D(64, (3, 3), padding='same',
                    input_shape=(128,480,1)))
