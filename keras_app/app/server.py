@@ -97,7 +97,7 @@ async def upload(request):
 def model_predict(img_path, model):
     img = image.load_img(img_path, target_size=(128, 480),color_mode='grayscale')
     x = np.expand_dims(image.img_to_array(img), axis=0)
-    result = classes[np.argmax(model.predict(x,batch=1))]
+    result = classes[np.argmax(model.predict(x,batch_size=1))]
     with open(PREDICTION_FILE_SRC, 'w') as f: f.write(str(result))
     result_html = path/'static'/'result.html'
     return HTMLResponse(result_html.open().read())
